@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = __dirname;
-const ASSETS = 'https://reel-ref-try-the-look.vercel.app/assets/';
+const ASSETS = 'assets/';
 const STORE = 'https://nike-makknzjs.myshopify.com';
 const HANDLE = 'template--28035983671601__the_runway_wdM8BG';
 
@@ -24,23 +24,23 @@ const VENDORS = {
 };
 
 const IMAGE_SIZES = {
-  'source-tatum-5-orbit-copy.webp': [400, 400],
-  'source-tatum-5-orbit.webp': [400, 400],
-  'source-air-jordan-12-retro-copy.webp': [400, 400],
-  'source-tshirt.webp': [400, 563],
-  'source-sweatshirt.webp': [400, 581],
-  'source-sweatshirt-plus.webp': [400, 610],
-  'source-hoodie.webp': [400, 555],
-  'source-hoodie-black.webp': [400, 536]
+  'source-tatum-5-orbit-copy.webp': [175, 174],
+  'source-tatum-5-orbit.webp': [175, 174],
+  'source-air-jordan-12-retro-copy.webp': [175, 174],
+  'source-tshirt.webp': [131, 185],
+  'source-sweatshirt.webp': [142, 206],
+  'source-sweatshirt-plus.webp': [135, 206],
+  'source-hoodie.webp': [148, 206],
+  'source-hoodie-black.webp': [139, 186]
 };
 
 const MODEL_FILES = [
-  { src: 'model-1-640.webp', large: 'original-look-1.webp' },
-  { src: 'model-5-640.webp', large: 'original-look-5.webp' },
-  { src: 'model-4-640.webp', large: 'original-look-4.webp' },
-  { src: 'model-6-640.webp', large: 'original-look-6.webp' },
-  { src: 'model-3-640.webp', large: 'original-look-3.webp' },
-  { src: 'model-2-640.webp', large: 'original-look-2.webp' }
+  { src: 'model-1.webp' },
+  { src: 'model-2.webp' },
+  { src: 'model-3.webp' },
+  { src: 'model-4.webp' },
+  { src: 'model-5.webp' },
+  { src: 'model-6.webp' }
 ];
 
 const PINS = [
@@ -105,7 +105,7 @@ const jsonCatalog = {
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 function modelImage(look, { eager = true } = {}) {
-  return `<img src="${ASSETS}${look.model.src}" srcset="${ASSETS}${look.model.src} 640w, ${ASSETS}${look.model.large} 1080w" sizes="(min-width: 1800px) 540px, (min-width: 750px) 420px, 320px" loading="${eager ? 'eager' : 'lazy'}" decoding="async" width="1100" height="1956" draggable="false" data-model-image alt="${esc(look.name)}">`;
+  return `<img src="${ASSETS}${look.model.src}" loading="${eager ? 'eager' : 'lazy'}" decoding="async" width="334" height="593" draggable="false" data-model-image alt="${esc(look.name)}">`;
 }
 
 function pinsMarkup(look) {
@@ -222,7 +222,7 @@ const ticks = looks.map((look, i) => `<button class="rw__tick" data-rw-tick="${i
 
 /* -------------------------------------------------------------------- page */
 const tokens = [
-  '--rw-c-stage:#ffffff', '--rw-c-panel:#ffffff', '--rw-c-text:#151413', '--rw-c-muted:#66625c',
+  '--rw-c-stage:#f4f1f1', '--rw-c-panel:#ffffff', '--rw-c-text:#151413', '--rw-c-muted:#66625c',
   '--rw-c-accent:#0e0e0e', '--rw-c-on-accent:#ffffff', '--rw-c-line:#c8c8c8', '--rw-card:#DFDFDF',
   '--rw-hf:var(--font-heading--family, inherit)', '--rw-hw:400',
   '--rw-h-d:46px', '--rw-h-m:24px', '--rw-sub-d:12px', '--rw-sub-m:12px',
@@ -245,7 +245,7 @@ const html = `<!doctype html>
 <title>Try the Look — Demo</title>
 <meta name="description" content="Six looks, styled head to toe. Explore the runway, isolate a look, and tap a pin to see the piece.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23151413'/%3E%3C/svg%3E">
-<link rel="preload" as="image" href="${ASSETS}model-1-640.webp" fetchpriority="high">
+<link rel="preload" as="image" href="${ASSETS}model-1.webp" fetchpriority="high">
 <style>
 __STYLES__
 </style>
@@ -253,7 +253,7 @@ __STYLES__
 <body>
 
 <header class="site-header shopify-section-group-header-group">
-  <a href="./" class="brand" aria-label="Runway home"><img src="${ASSETS}nike-logo.svg" width="68" height="24" alt="Nike"></a>
+  <a href="./" class="brand" aria-label="Runway demo home"><span class="brand-wordmark">RUNWAY <span>DEMO</span></span></a>
   <nav aria-label="Main navigation">
     <a href="./">Home</a>
     <a href="${STORE}/pages/nike-orbit" target="_blank" rel="noopener noreferrer">Nike Orbit</a>
