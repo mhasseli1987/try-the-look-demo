@@ -1,0 +1,13 @@
+# QA screenshots and temporary comparison images
+*.png
+
+# Downloadable bundles are generated artifacts; keep the repository source clean
+*.zip
+
+# Local browser/debug scripts from the build-validation session
+compare.py
+inspect_*.py
+pixdiff.py
+ref.py
+shot.py
+test_*.py
