@@ -1,26 +1,27 @@
 #!/usr/bin/env node
-/* Builds the standalone index.html from src/styles.css, src/runway.js and catalog.json */
+/* Builds the standalone index.html from src/styles.css, src/runway.js and catalog.json.
+   Produces two variants: LTR (English) at ./index.html and RTL (Persian) at ./dist/RTL/index.html */
 const fs = require('fs');
 const path = require('path');
 
 const ROOT = __dirname;
 const ASSETS = 'assets/';
-const STORE = 'https://nike-makknzjs.myshopify.com';
-const HANDLE = 'template--28035983671601__the_runway_wdM8BG';
+const HANDLE = 'runway-demo';
 
 const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'catalog.json'), 'utf8'));
 
 const LOOK_KEYS = ['bndthK', 'XckgG6', 'rLfAhC', 'FKg67q', '8KREEE', 'N3bfm9'];
 
+/* Vendor label shown above each product name. Customize per item if needed. */
 const VENDORS = {
-  'tatum-5-orbit-copy': 'Nikey | Password: 1',
-  tshirt: 'Nike',
-  sweatshirt: 'Nike',
-  'tatum-5-orbit': 'Nikey | Password: 1',
-  'hoodie-black': 'Nike',
-  'sweatshirt-plus': 'Nike',
-  hoodie: 'Nike',
-  'air-jordan-12-retro-copy': 'Nikey | Password: 1'
+  'sneaker-court': 'Runway Studio',
+  tshirt: 'Runway Studio',
+  sweatshirt: 'Runway Studio',
+  'sneaker-orbit': 'Runway Studio',
+  'hoodie-black': 'Runway Studio',
+  'sweatshirt-plus': 'Runway Studio',
+  hoodie: 'Runway Studio',
+  'sneaker-street': 'Runway Studio'
 };
 
 const IMAGE_SIZES = {
@@ -44,17 +45,17 @@ const MODEL_FILES = [
 ];
 
 const PINS = [
-  [['Air Jordan 12 Retro', 47, 27], ['Tshirt', 48, 58], ['Sweatshirt', 45, 96]],
-  [['Tatum 5 Orbit', 50, 28], ['Hoodie Black', 48, 58], ['Tshirt', 45, 88]],
-  [['Sweatshirt Plus', 50, 28], ['Tatum 5 Orbit', 48, 58], ['Tshirt', 45, 88]],
-  [['Hoodie Black', 50, 28], ['Air Jordan 12 Retro', 48, 58], ['Tshirt', 45, 88]],
-  [['Sweatshirt', 50, 28], ['Tatum 5 Orbit', 48, 58], ['Tshirt', 45, 88]],
-  [['Hoodie', 50, 28], ['Luka 5', 48, 58], ['Tshirt', 45, 88]]
+  [['Court Sneaker', 47, 27], ['Oversize Tee', 48, 58], ['Sweatshirt', 45, 96]],
+  [['Orbit Sneaker', 50, 28], ['Hoodie Black', 48, 58], ['Oversize Tee', 45, 88]],
+  [['Sweatshirt Plus', 50, 28], ['Orbit Sneaker', 48, 58], ['Oversize Tee', 45, 88]],
+  [['Hoodie Black', 50, 28], ['Court Sneaker', 48, 58], ['Oversize Tee', 45, 88]],
+  [['Sweatshirt', 50, 28], ['Orbit Sneaker', 48, 58], ['Oversize Tee', 45, 88]],
+  [['Hoodie', 50, 28], ['Street Sneaker', 48, 58], ['Oversize Tee', 45, 88]]
 ];
 
 const TAGS = {
   '1:hoodie-black': 'New',
-  '2:tatum-5-orbit': 'New'
+  '2:sneaker-orbit': 'New'
 };
 
 /* --------------------------------------------------------------- normalize */
@@ -63,7 +64,7 @@ const items = catalog.items.map((item) => {
   const [w, h] = IMAGE_SIZES[file];
   return {
     ...item,
-    vendor: VENDORS[item.id],
+    vendor: VENDORS[item.id] || 'Runway Studio',
     image: ASSETS + file,
     file,
     w,
@@ -101,6 +102,80 @@ const jsonCatalog = {
   }))
 };
 
+/* ------------------------------------------------------------------- i18n */
+const toFa = (s) => String(s).replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[d]);
+
+const STR = {
+  en: {
+    dir: 'ltr', lang: 'en',
+    title: 'Try the Look — Fashion Store Template',
+    description: 'Interactive runway shop template: six looks, styled head to toe. Drag the carousel, tap a pin, pick a size and build a local styling bag. Pure HTML, CSS and JavaScript — no framework.',
+    heading: 'Try the Look.',
+    sub: 'Six looks, styled head to toe. Tap a pin to see the piece.',
+    navHome: 'Home', navRunway: 'Runway',
+    openBag: 'Open styling bag', closeBag: 'Close styling bag',
+    stageLabel: 'Try the Look. — use arrow keys or swipe to change look',
+    drag: 'Drag', view: 'View',
+    prev: 'Previous look', next: 'Next look', auto: 'Autoplay',
+    lbWord: 'Look', lbRegion: 'View look', lbHint: 'Tap a dot to shop the piece',
+    lookN: 'Look {i}: {n}', viewLook: 'View look: {n}', pinLabel: '{i}: {n}',
+    inThisLook: 'In this look', pieces: '{n} pieces',
+    addToBag: 'Add to bag', addedToBag: 'Added to bag: {n}', closePicker: 'Close size picker',
+    size: 'Size', shoeSize: 'Shoe size',
+    completeLook: 'Complete the look', bundleNote: 'Bundle all {n} and save 10%',
+    addFull: 'Add full look to bag', addFullM: 'Add full look — {p}', fullDone: 'Full look in your bag',
+    bagTitle: 'Your styling bag',
+    bagNote: 'A local outfit shortlist. No payment or order is collected here. Open a piece on your own store to continue.',
+    downloadList: 'Download outfit shortlist',
+    msgChoose: 'Pick a size for: [items]', msgError: 'Couldn’t add to bag. Please try again.', msgSoldout: 'Sold out',
+    i18n: null
+  },
+  fa: {
+    dir: 'rtl', lang: 'fa',
+    title: 'حالت را امتحان کن — قالب فروشگاهی مد',
+    description: 'قالب ویترین رانوی تعاملی برای فروشگاه‌های پوشاک: شش استایل کامل از سر تا پا، چرخ‌فلک سه‌بعدی، پین محصول روی مدل، انتخاب سایز و سبد استایل محلی — با HTML، CSS و جاوااسکریپت خالص و بدون هیچ فریم‌ورکی.',
+    heading: 'حالت را امتحان کن.',
+    sub: 'شش استایل کامل از سر تا پا. روی پین بزنید تا محصول را ببینید.',
+    navHome: 'خانه', navRunway: 'رانوی',
+    openBag: 'باز کردن سبد استایل', closeBag: 'بستن سبد استایل',
+    stageLabel: 'حالت را امتحان کن — با کلیدهای جهت‌دار یا سوایپ استایل را عوض کنید',
+    drag: 'بکشید', view: 'مشاهده',
+    prev: 'استایل قبلی', next: 'استایل بعدی', auto: 'پخش خودکار',
+    lbWord: 'استایل', lbRegion: 'مشاهده استایل', lbHint: 'روی نقطه بزنید تا محصول را ببینید',
+    lookN: 'استایل {i}: {n}', viewLook: 'مشاهده استایل: {n}', pinLabel: '{i}: {n}',
+    inThisLook: 'در این استایل', pieces: '{n} قطعه',
+    addToBag: 'افزودن به سبد', addedToBag: 'به سبد اضافه شد: {n}', closePicker: 'بستن انتخاب سایز',
+    size: 'سایز', shoeSize: 'سایز کفش',
+    completeLook: 'استایل را کامل کنید', bundleNote: 'هر {n} قطعه را بسته بگیرید و ۱۰٪ تخفیف بگیرید',
+    addFull: 'افزودن کل استایل به سبد', addFullM: 'افزودن کل استایل — {p}', fullDone: 'استایل کامل در سبد شما',
+    bagTitle: 'سبد استایل شما',
+    bagNote: 'یک لیست استایل محلی. هیچ پرداخت یا سفارشی اینجا ثبت نمی‌شود. برای ادامه، محصول را در فروشگاه خودتان باز کنید.',
+    downloadList: 'دانلود لیست استایل',
+    msgChoose: 'سایز را انتخاب کنید: [items]', msgError: 'افزودن به سبد ناموفق بود. دوباره تلاش کنید.', msgSoldout: 'ناموجود',
+    i18n: {
+      savedPiece: 'محصول در سبد استایل شما ذخیره شد',
+      savedLook: 'استایل در سبد استایل شما ذخیره شد',
+      emptyBag: 'سبد استایل شما خالی است. کنار محصول، سایز را انتخاب کنید.',
+      bagRow: 'سایز {o} · تعداد {q} · {p}',
+      viewProduct: 'مشاهده محصول ↗',
+      subtotal: 'جمع مرجع {t}',
+      chooseSize: 'لطفاً یک سایز موجود انتخاب کنید.',
+      unavailable: 'لیست محصولات در دسترس نیست.',
+      notLoadable: 'لیست محصولات بارگذاری نشد.',
+      lookLabel: 'استایل {i}: {n}',
+      pieces: '{n} قطعه',
+      exportTitle: 'رانوی — لیست استایل',
+      exportNote: 'قیمت‌ها مرجع هستند؛ هیچ سفارش یا پرداختی ثبت نشده است.'
+    }
+  }
+};
+
+const fmt = (s, vars) => {
+  let out = String(s);
+  if (vars) for (const [k, v] of Object.entries(vars)) out = out.split('{' + k + '}').join(String(vars[k]));
+  return out;
+};
+
 /* ------------------------------------------------------------------- parts */
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -108,41 +183,41 @@ function modelImage(look, { eager = true } = {}) {
   return `<img src="${ASSETS}${look.model.src}" loading="${eager ? 'eager' : 'lazy'}" decoding="async" width="334" height="593" draggable="false" data-model-image alt="${esc(look.name)}">`;
 }
 
-function pinsMarkup(look) {
+function pinsMarkup(look, str) {
   return look.pins.map(([name, left, top], idx) => {
     const n = idx + 1;
-    return `<button class="rw__pin" data-rw-pin="${n}" data-tip="${esc(name)}" style="left:${left}%;top:${top}%;--pi:${n}" aria-label="${n}: ${esc(name)}" tabindex="-1"><span class="rw__pin-dot">${n}</span></button>`;
+    return `<button class="rw__pin" data-rw-pin="${n}" data-tip="${esc(name)}" style="left:${left}%;top:${top}%;--pi:${n}" aria-label="${esc(fmt(str.pinLabel, { i: n, n: name }))}" tabindex="-1"><span class="rw__pin-dot">${n}</span></button>`;
   }).join('');
 }
 
-function bodyMarkup(look, index) {
+function bodyMarkup(look, index, str) {
   return `<div class="rw__model" data-rw-model data-index="${index}" aria-hidden="true">
   <span class="rw__shadow"></span>
   <div class="rw__figure" style="--rw-ar:0.5625">
     <div class="rw__art">
       ${modelImage(look)}
-      <button class="rw__hit" data-rw-go="${index}" aria-label="Look ${index + 1}: ${esc(look.name)}" tabindex="-1"></button>
+      <button class="rw__hit" data-rw-go="${index}" aria-label="${esc(fmt(str.lookN, { i: index + 1, n: look.name }))}" tabindex="-1"></button>
     </div>
   </div>
 </div>`;
 }
 
-function heroMarkup(look, index) {
-  return `<div class="rw__hero${index === 0 ? ' is-on' : ''}" data-rw-hero data-index="${index}" data-name="${esc(look.name)}" data-label="Look ${index + 1}: ${esc(look.name)}" data-probe="${ASSETS}${look.model.src}" aria-hidden="${index === 0 ? 'false' : 'true'}">
+function heroMarkup(look, index, str) {
+  return `<div class="rw__hero${index === 0 ? ' is-on' : ''}" data-rw-hero data-index="${index}" data-name="${esc(look.name)}" data-label="${esc(fmt(str.lookN, { i: index + 1, n: look.name }))}" data-probe="${ASSETS}${look.model.src}" aria-hidden="${index === 0 ? 'false' : 'true'}">
   <div class="rw__morph">
     <span class="rw__shadow"></span>
     <div class="rw__figure" style="--rw-ar:0.5625">
       <div class="rw__art">
         ${modelImage(look)}
-        <button class="rw__zoom" data-rw-zoom aria-label="View look: ${esc(look.name)}" tabindex="${index === 0 ? '0' : '-1'}"></button>
-        <div class="rw__pins">${pinsMarkup(look)}</div>
+        <button class="rw__zoom" data-rw-zoom aria-label="${esc(fmt(str.viewLook, { n: look.name }))}" tabindex="${index === 0 ? '0' : '-1'}"></button>
+        <div class="rw__pins">${pinsMarkup(look, str)}</div>
       </div>
     </div>
   </div>
 </div>`;
 }
 
-function pickerMarkup(look, item, n) {
+function pickerMarkup(look, item, n, str) {
   const id = `Picker-${HANDLE}-look_${look.key}-${n}`;
   const name = `Opt-${HANDLE}-look_${look.key}-${n}-1`;
   const variants = item.variants.map((v) => ({ id: v.id, a: v.a, o: v.o }));
@@ -155,23 +230,23 @@ function pickerMarkup(look, item, n) {
       <p class="rw__picker-title">${esc(item.name)}</p>
       <p class="rw__picker-price">$${item.price.toFixed(2)}</p>
     </div>
-    <button class="rw__pick-close" type="button" data-rw-pick-close aria-label="Close size picker">×</button>
+    <button class="rw__pick-close" type="button" data-rw-pick-close aria-label="${esc(str.closePicker)}">×</button>
   </div>
   <fieldset class="rw__opt">
-    <legend class="rw__opt-name">${item.id.endsWith('-copy') || item.id.startsWith('tatum') || item.id.startsWith('air') ? 'Shoe size' : 'Size'}</legend>
+    <legend class="rw__opt-name">${/^\d+$/.test(item.sizes[0]) ? str.shoeSize : str.size}</legend>
     <div class="rw__values">${values}</div>
   </fieldset>
-  <button class="rw__confirm" type="button" data-rw-confirm><span data-rw-confirm-label data-add="Add to bag">Add to bag</span><span class="rw__sr"> — ${esc(item.name)}</span></button>
+  <button class="rw__confirm" type="button" data-rw-confirm><span data-rw-confirm-label data-add="${esc(str.addToBag)}">${esc(str.addToBag)}</span><span class="rw__sr"> — ${esc(item.name)}</span></button>
   <script type="application/json" data-rw-variants>${JSON.stringify(variants)}</script>
 </div>`;
 }
 
-function rowMarkup(look, index, productId, n) {
+function rowMarkup(look, index, productId, n, str) {
   const item = itemById[productId];
   const tag = TAGS[`${index}:${productId}`];
   const pickerId = `Picker-${HANDLE}-look_${look.key}-${n}`;
   return `<li class="rw__item" data-rw-card="${n}" style="--i:${n}" data-title="${esc(item.name)}">
-  ${tag ? `<span class="rw__tag"><span class="rw__tag-text">${tag}</span></span>` : ''}
+  ${tag ? `<span class="rw__tag"><span class="rw__tag-text">${esc(tag)}</span></span>` : ''}
   <a class="rw__media" href="${item.url}" target="_blank" rel="noopener noreferrer" tabindex="-1" aria-hidden="true">
     <img src="${item.image}" width="${item.w}" height="${item.h}" loading="lazy" decoding="async" alt="">
     <span class="rw__num">${n}</span>
@@ -181,19 +256,23 @@ function rowMarkup(look, index, productId, n) {
     <a class="rw__name" href="${item.url}" target="_blank" rel="noopener noreferrer">${esc(item.name)}</a>
     <span class="rw__price"><span>$${item.price.toFixed(2)}</span></span>
   </div>
-  <button class="rw__add" type="button" data-rw-add aria-expanded="false" aria-controls="${pickerId}" aria-label="Add to bag: ${esc(item.name)}" data-added-label="Added to bag: ${esc(item.name)}">
+  <button class="rw__add" type="button" data-rw-add aria-expanded="false" aria-controls="${pickerId}" aria-label="${esc(fmt(str.addedToBag, { n: item.name }))}" data-added-label="${esc(fmt(str.addedToBag, { n: item.name }))}">
     <svg class="rw__ic-plus" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M12 4v16M4 12h16"/></svg>
     <svg class="rw__ic-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L19.5 7"/></svg>
     <svg class="rw__ic-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 3a9 9 0 1 1-9 9"/></svg>
   </button>
-  ${pickerMarkup(look, item, n)}
+  ${pickerMarkup(look, item, n, str)}
 </li>`;
 }
 
-function panelMarkup(look, index) {
-  const rows = look.products.map((id, i) => rowMarkup(look, index, id, i + 1)).join('\n');
+function panelMarkup(look, index, str) {
+  const rows = look.products.map((id, i) => rowMarkup(look, index, id, i + 1, str)).join('\n');
+  const pieces = look.products.length;
+  const bundle = look.products.reduce((sum, id) => sum + itemById[id].price, 0);
+  const bundleDeal = (bundle * 0.9).toFixed(2);
+  const piecesTxt = esc(fmt(str.pieces, { n: str.dir === 'rtl' ? toFa(pieces) : pieces }));
   return `<div class="rw__look-panel${index === 0 ? ' is-in' : ''}" data-rw-panel="${index}"${index === 0 ? '' : ' hidden'}>
-  <div class="rw__mhead"><span class="rw__mhead-title">${esc(look.name)}</span><span class="rw__label" data-rw-pieces>3 pieces</span></div>
+  <div class="rw__mhead"><span class="rw__mhead-title">${esc(look.name)}</span><span class="rw__label" data-rw-pieces>${piecesTxt}</span></div>
   <ul class="rw__items" role="list">
 ${rows}
   </ul>
@@ -201,49 +280,53 @@ ${rows}
     <p class="rw__msg" data-rw-msg role="status" aria-live="polite" hidden></p>
     <div class="rw__bundle-row">
       <div class="rw__bundle-copy">
-        <span class="rw__bundle-title">Complete the look</span>
-        <span class="rw__bundle-note">Bundle all 3 and save 10%</span>
+        <span class="rw__bundle-title">${esc(str.completeLook)}</span>
+        <span class="rw__bundle-note">${esc(fmt(str.bundleNote, { n: str.dir === 'rtl' ? toFa(pieces) : pieces }))}</span>
       </div>
-      <div class="rw__bundle-price"><s>$547.00</s><strong>$492.30</strong></div>
+      <div class="rw__bundle-price"><s>$${bundle.toFixed(2)}</s><strong>$${bundleDeal}</strong></div>
     </div>
     <button class="rw__cta" type="button" data-rw-all>
-      <span class="rw__cta-add">Add full look to bag</span>
-      <span class="rw__cta-m">Add full look — $492.30</span>
-      <span class="rw__cta-done">Full look in your bag</span>
+      <span class="rw__cta-add">${esc(str.addFull)}</span>
+      <span class="rw__cta-m">${esc(fmt(str.addFullM, { p: bundleDeal }))}</span>
+      <span class="rw__cta-done">${esc(str.fullDone)}</span>
       <svg class="rw__cta-arrow" width="22" height="12" viewBox="0 0 26 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7h24M19 1l6 6-6 6"/></svg>
       <svg class="rw__cta-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3a9 9 0 1 1-9 9"/></svg>
     </button>
   </div>
-  <template data-rw-pieces-text>3 pieces</template>
+  <template data-rw-pieces-text>${piecesTxt}</template>
 </div>`;
 }
 
-const ticks = looks.map((look, i) => `<button class="rw__tick" data-rw-tick="${i}" aria-current="${i === 0 ? 'true' : 'false'}" aria-label="Look ${i + 1}: ${esc(look.name)}"><span class="rw__tick-bar"></span><span class="rw__tick-label">0${i + 1}<span class="rw__tick-name">&nbsp;&nbsp;${esc(look.name)}</span></span></button>`).join('\n      ');
+function buildPage(str) {
+  const ticks = looks.map((look, i) => `<button class="rw__tick" data-rw-tick="${i}" aria-current="${i === 0 ? 'true' : 'false'}" aria-label="${esc(fmt(str.lookN, { i: i + 1, n: look.name }))}"><span class="rw__tick-bar"></span><span class="rw__tick-label">0${i + 1}<span class="rw__tick-name">&nbsp;&nbsp;${esc(look.name)}</span></span></button>`).join('\n      ');
 
-/* -------------------------------------------------------------------- page */
-const tokens = [
-  '--rw-c-stage:#f4f1f1', '--rw-c-panel:#ffffff', '--rw-c-text:#151413', '--rw-c-muted:#66625c',
-  '--rw-c-accent:#0e0e0e', '--rw-c-on-accent:#ffffff', '--rw-c-line:#c8c8c8', '--rw-card:#DFDFDF',
-  '--rw-hf:var(--font-heading--family, inherit)', '--rw-hw:400',
-  '--rw-h-d:46px', '--rw-h-m:24px', '--rw-sub-d:12px', '--rw-sub-m:12px',
-  '--rw-eyebrow-d:11px', '--rw-eyebrow-m:10px', '--rw-label-d:10px', '--rw-label-m:9px',
-  '--rw-chip-d:17px', '--rw-chip-m:18px', '--rw-ph-d:18px', '--rw-ph-m:16px',
-  '--rw-pt-size-d:13px', '--rw-pt-size-m:12px', '--rw-price-d:12px', '--rw-price-m:12px',
-  '--rw-opt-d:11px', '--rw-opt-m:11px', '--rw-total-d:16px', '--rw-total-m:16px',
-  '--rw-thumb-d:92px', '--rw-thumb-m:62px', '--rw-tag-top:18px', '--rw-tag-left:0px',
-  '--rw-thumb-radius:0px', '--rw-morph:900ms', '--rw-bar-r:20px', '--rw-panel-w:380px',
-  '--rw-panel-pad-d:32px', '--rw-radius:0px', '--rw-max:none', '--rw-speed:5s', '--rw-ax:40%',
-  '--rw-btn-radius:0px', '--rw-pill-radius:30px', '--rw-add-radius:20px'
-].join(';');
+  const tokens = [
+    '--rw-c-stage:#f4f1f1', '--rw-c-panel:#ffffff', '--rw-c-text:#151413', '--rw-c-muted:#66625c',
+    '--rw-c-accent:#0e0e0e', '--rw-c-on-accent:#ffffff', '--rw-c-line:#c8c8c8', '--rw-card:#DFDFDF',
+    '--rw-hf:var(--font-heading--family, inherit)', '--rw-hw:400',
+    '--rw-h-d:46px', '--rw-h-m:24px', '--rw-sub-d:12px', '--rw-sub-m:12px',
+    '--rw-eyebrow-d:11px', '--rw-eyebrow-m:10px', '--rw-label-d:10px', '--rw-label-m:9px',
+    '--rw-chip-d:17px', '--rw-chip-m:18px', '--rw-ph-d:18px', '--rw-ph-m:16px',
+    '--rw-pt-size-d:13px', '--rw-pt-size-m:12px', '--rw-price-d:12px', '--rw-price-m:12px',
+    '--rw-opt-d:11px', '--rw-opt-m:11px', '--rw-total-d:16px', '--rw-total-m:16px',
+    '--rw-thumb-d:92px', '--rw-thumb-m:62px', '--rw-tag-top:18px', '--rw-tag-left:0px',
+    '--rw-thumb-radius:0px', '--rw-morph:900ms', '--rw-bar-r:20px', '--rw-panel-w:380px',
+    '--rw-panel-pad-d:32px', '--rw-radius:0px', '--rw-max:none', '--rw-speed:5s', '--rw-ax:40%',
+    '--rw-btn-radius:0px', '--rw-pill-radius:30px', '--rw-add-radius:20px'
+  ].join(';');
 
-const html = `<!doctype html>
-<html lang="en">
+  const i18nScript = str.i18n
+    ? `<script>window.RUNWAY_I18N = ${JSON.stringify(str.i18n).replace(/</g, '\\u003c')};</script>\n`
+    : '';
+
+  return `<!doctype html>
+<html lang="${str.lang}" dir="${str.dir}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#ffffff">
-<title>Try the Look — Demo</title>
-<meta name="description" content="Six looks, styled head to toe. Explore the runway, isolate a look, and tap a pin to see the piece.">
+<title>${esc(str.title)}</title>
+<meta name="description" content="${esc(str.description)}">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23151413'/%3E%3C/svg%3E">
 <link rel="preload" as="image" href="${ASSETS}model-1.webp" fetchpriority="high">
 <style>
@@ -253,14 +336,12 @@ __STYLES__
 <body>
 
 <header class="site-header shopify-section-group-header-group">
-  <a href="./" class="brand" aria-label="Runway demo home"><span class="brand-wordmark">RUNWAY <span>DEMO</span></span></a>
+  <a href="./" class="brand" aria-label="Runway store home"><span class="brand-wordmark">RUNWAY <span>STORE</span></span></a>
   <nav aria-label="Main navigation">
-    <a href="./">Home</a>
-    <a href="${STORE}/pages/nike-orbit" target="_blank" rel="noopener noreferrer">Nike Orbit</a>
-    <a href="${STORE}/pages/scene-rail" target="_blank" rel="noopener noreferrer">Hand Rail Pro</a>
-    <a href="./" aria-current="page">Runway</a>
+    <a href="./">${esc(str.navHome)}</a>
+    <a href="./" aria-current="page">${esc(str.navRunway)}</a>
   </nav>
-  <button id="open-bag" type="button" aria-label="Open styling bag">
+  <button id="open-bag" type="button" aria-label="${esc(str.openBag)}">
     <svg width="22" height="24" viewBox="0 0 24 26" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M4 8h16l1 16H3L4 8zM8 8V6a4 4 0 0 1 8 0v2"/></svg>
     <span data-cart-count>0</span>
   </button>
@@ -271,57 +352,57 @@ __STYLES__
   data-feel="balanced" data-blur="true" data-mblur="true" data-style="ring" data-mstyle="classic"
   data-fit="true" data-height-mode="original" data-height-vh="100" data-mheight-mode="custom"
   data-mheight-vh="109" data-reflect="false" data-autoplay="true" data-speed="5000"
-  data-after-add="stay" data-bundle-code="" data-msg-choose="Pick a size for: [items]"
-  data-msg-error="Couldn’t add to bag. Please try again." data-msg-soldout="Sold out">
+  data-after-add="stay" data-bundle-code="" data-msg-choose="${esc(str.msgChoose)}"
+  data-msg-error="${esc(str.msgError)}" data-msg-soldout="${esc(str.msgSoldout)}">
   <div class="rw__sticky">
     <div class="rw__grid">
       <div class="rw__left">
         <div class="rw__head">
           <div class="rw__intro">
-            <h2 class="rw__title">Try the Look.</h2>
-            <p class="rw__sub">Six looks, styled head to toe. Tap a pin to see the piece.</p>
+            <h2 class="rw__title">${esc(str.heading)}</h2>
+            <p class="rw__sub">${esc(str.sub)}</p>
           </div>
           <span class="rw__sr" aria-live="polite" aria-atomic="true" data-rw-live></span>
         </div>
 
-        <div class="rw__stage" data-rw-stage tabindex="0" role="region" aria-roledescription="carousel" aria-label="Try the Look. — use arrow keys or swipe to change look">
+        <div class="rw__stage" data-rw-stage tabindex="0" role="region" aria-roledescription="carousel" aria-label="${esc(str.stageLabel)}">
           <div class="rw__actors" data-rw-actors>
-${looks.map((look, i) => bodyMarkup(look, i)).join('\n')}
+${looks.map((look, i) => bodyMarkup(look, i, str)).join('\n')}
           </div>
           <div class="rw__heroes" data-rw-heroes>
-${looks.map((look, i) => heroMarkup(look, i)).join('\n')}
+${looks.map((look, i) => heroMarkup(look, i, str)).join('\n')}
           </div>
           <span class="rw__sweep"></span>
-          <span class="rw__cursor" data-rw-cursor><span class="rw__cursor-in"><span class="rw__cursor-label rw__cursor-drag">Drag</span><span class="rw__cursor-label rw__cursor-view">View</span></span></span>
+          <span class="rw__cursor" data-rw-cursor><span class="rw__cursor-in"><span class="rw__cursor-label rw__cursor-drag">${esc(str.drag)}</span><span class="rw__cursor-label rw__cursor-view">${esc(str.view)}</span></span></span>
           <span class="rw__walk"><span class="rw__walk-line"></span></span>
         </div>
 
         <div class="rw__controls">
-          <button class="rw__icon" type="button" data-rw-prev aria-label="Previous look"><svg width="26" height="14" viewBox="0 0 26 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M25 7H1M7 1L1 7l6 6"/></svg></button>
+          <button class="rw__icon" type="button" data-rw-prev aria-label="${esc(str.prev)}"><svg width="26" height="14" viewBox="0 0 26 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M25 7H1M7 1L1 7l6 6"/></svg></button>
           <div class="rw__ticks">
       ${ticks}
           </div>
-          <button class="rw__icon rw__auto" type="button" data-rw-auto aria-pressed="false" aria-label="Autoplay">
+          <button class="rw__icon rw__auto" type="button" data-rw-auto aria-pressed="false" aria-label="${esc(str.auto)}">
             <svg class="rw__ic-play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12.5-7.5z"/></svg>
             <svg class="rw__ic-pause" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6.5 4.5h3.5v15H6.5zM14 4.5h3.5v15H14z"/></svg>
           </button>
-          <button class="rw__icon" type="button" data-rw-next aria-label="Next look"><svg width="26" height="14" viewBox="0 0 26 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7h24M19 1l6 6-6 6"/></svg></button>
+          <button class="rw__icon" type="button" data-rw-next aria-label="${esc(str.next)}"><svg width="26" height="14" viewBox="0 0 26 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7h24M19 1l6 6-6 6"/></svg></button>
         </div>
 
-        <div class="rw__lb" data-rw-lb data-word="Look" role="region" aria-label="View look" aria-hidden="true">
+        <div class="rw__lb" data-rw-lb data-word="${esc(str.lbWord)}" role="region" aria-label="${esc(str.lbRegion)}" aria-hidden="true">
           <div class="rw__lb-stage" data-rw-lb-stage></div>
           <div class="rw__lb-top">
             <p class="rw__lb-cap"><span class="rw__lb-kicker" data-rw-lb-kicker></span><span class="rw__lb-name" data-rw-lb-name></span></p>
             <button class="rw__lb-close" type="button" data-rw-zoom-close aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
           </div>
-          <p class="rw__lb-hint">Tap a dot to shop the piece</p>
+          <p class="rw__lb-hint">${esc(str.lbHint)}</p>
         </div>
       </div>
 
       <aside class="rw__panel has-rule">
         <div class="rw__panel-inner">
-          <div class="rw__panel-head"><h3 class="rw__panel-title">In this look</h3><span class="rw__label" data-rw-pieces>3 pieces</span></div>
-${looks.map((look, i) => panelMarkup(look, i)).join('\n')}
+          <div class="rw__panel-head"><h3 class="rw__panel-title">${esc(str.inThisLook)}</h3><span class="rw__label" data-rw-pieces>${esc(fmt(str.pieces, { n: str.dir === 'rtl' ? toFa(looks[0].products.length) : looks[0].products.length }))}</span></div>
+${looks.map((look, i) => panelMarkup(look, i, str)).join('\n')}
         </div>
       </aside>
     </div>
@@ -331,33 +412,61 @@ ${looks.map((look, i) => panelMarkup(look, i)).join('\n')}
 
 <dialog id="bag-dialog">
   <div class="bag-heading">
-    <h2>Your styling bag</h2>
-    <button id="close-bag" type="button" aria-label="Close styling bag">×</button>
+    <h2>${esc(str.bagTitle)}</h2>
+    <button id="close-bag" type="button" aria-label="${esc(str.closeBag)}">×</button>
   </div>
-  <p class="bag-note">A local outfit shortlist. No payment or order is collected here. Open a piece on the original demo to continue.</p>
+  <p class="bag-note">${esc(str.bagNote)}</p>
   <div id="bag-items"></div>
   <p id="bag-total"></p>
-  <button id="export-bag" type="button">Download outfit shortlist</button>
+  <button id="export-bag" type="button">${esc(str.downloadList)}</button>
 </dialog>
 
 <div id="bag-status" role="status" aria-live="polite"></div>
 
 <script type="application/json" id="rw-catalog">${JSON.stringify(jsonCatalog).replace(/</g, '\\u003c')}</script>
-<script>
+${i18nScript}<script>
 __SCRIPT__
 </script>
 </body>
 </html>
 `;
+}
 
+/* -------------------------------------------------------------------- boot */
 const font = fs.readFileSync(path.join(ROOT, 'assets/inter-600.woff2')).toString('base64');
-const styles = fs.readFileSync(path.join(ROOT, 'src/styles.css'), 'utf8')
+const stylesSrc = fs.readFileSync(path.join(ROOT, 'src/styles.css'), 'utf8')
   .replace('__INTER_FONT__', `data:font/woff2;base64,${font}`);
 const script = fs.readFileSync(path.join(ROOT, 'src/runway.js'), 'utf8');
 
-const out = html
-  .replace('__STYLES__', () => styles)
-  .replace('__SCRIPT__', () => script);
+function copyDir(src, dest) {
+  fs.mkdirSync(dest, { recursive: true });
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    const s = path.join(src, entry.name);
+    const d = path.join(dest, entry.name);
+    if (entry.isDirectory()) copyDir(s, d);
+    else fs.copyFileSync(s, d);
+  }
+}
 
-fs.writeFileSync(path.join(ROOT, 'index.html'), out);
-console.log('index.html written:', (out.length / 1024).toFixed(1), 'KB');
+const SHARED = ['build.js', 'catalog.json', 'README.md'];
+const VARIANTS = { LTR: STR.en, RTL: STR.fa };
+
+for (const [name, str] of Object.entries(VARIANTS)) {
+  const dir = path.join(ROOT, 'dist', name);
+  fs.mkdirSync(dir, { recursive: true });
+  const page = buildPage(str)
+    .replace('__STYLES__', () => stylesSrc)
+    .replace('__SCRIPT__', () => script);
+  fs.writeFileSync(path.join(dir, 'index.html'), page);
+  copyDir(path.join(ROOT, 'assets'), path.join(dir, 'assets'));
+  fs.mkdirSync(path.join(dir, 'src'), { recursive: true });
+  fs.copyFileSync(path.join(ROOT, 'src/styles.css'), path.join(dir, 'src/styles.css'));
+  fs.copyFileSync(path.join(ROOT, 'src/runway.js'), path.join(dir, 'src/runway.js'));
+  for (const f of SHARED) fs.copyFileSync(path.join(ROOT, f), path.join(dir, f));
+  console.log(`dist/${name}/index.html (${str.dir}/${str.lang}) written:`, (page.length / 1024).toFixed(1), 'KB');
+}
+
+/* Root index.html stays the LTR build for local dev */
+fs.writeFileSync(path.join(ROOT, 'index.html'),
+  buildPage(STR.en).replace('__STYLES__', () => stylesSrc).replace('__SCRIPT__', () => script));
+console.log('index.html (root, LTR/en) written');

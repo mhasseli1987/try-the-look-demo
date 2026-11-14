@@ -22,9 +22,32 @@
 
   const LOOKS = CATALOG.looks;
 
+  /* ------------------------------------------------------------------- i18n */
+  /* Runtime strings can be overridden per build via window.RUNWAY_I18N. */
+  const I18N = Object.assign({
+    savedPiece: 'Piece saved to your styling bag',
+    savedLook: 'Look saved to your styling bag',
+    emptyBag: 'Your styling bag is empty. Choose a size beside a piece to save it.',
+    bagRow: 'Size {o} · Quantity {q} · {p}',
+    viewProduct: 'View product ↗',
+    subtotal: 'Reference subtotal {t}',
+    chooseSize: 'Please choose an available size.',
+    unavailable: 'The product list is unavailable.',
+    notLoadable: 'The product list could not load.',
+    lookLabel: 'Look {i}: {n}',
+    pieces: '{n} pieces',
+    exportTitle: 'RUNWAY — STYLING SHORTLIST',
+    exportNote: 'Reference prices; no order or payment has been placed.'
+  }, window.RUNWAY_I18N || {});
+  const t = (key, vars) => {
+    let s = I18N[key] || key;
+    if (vars) for (const [k, v] of Object.entries(vars)) s = s.split('{' + k + '}').join(String(v));
+    return s;
+  };
+
   function validateCatalog() {
     if (!CATALOG || !Array.isArray(CATALOG.items) || !CATALOG.items.length) {
-      throw new Error('The product list could not load.');
+      throw new Error(t('notLoadable'));
     }
     CATALOG.items.forEach((item) => {
       if (typeof item.id !== 'string' || typeof item.name !== 'string' ||
@@ -97,10 +120,10 @@
     },
 
     add(list) {
-      if (!this.ready) throw new Error('The product list is unavailable.');
+      if (!this.ready) throw new Error(t('unavailable'));
       list.forEach((entry) => {
         const found = this.variant(entry.id);
-        if (!found || !found.variant.a) throw new Error('Please choose an available size.');
+        if (!found || !found.variant.a) throw new Error(t('chooseSize'));
       });
       list.forEach((entry) => {
         const existing = this.entries.find((e) => e.id === entry.id);
@@ -109,7 +132,7 @@
       });
       this.save();
       this.render();
-      toast(list.length > 1 ? 'Look saved to your styling bag' : 'Piece saved to your styling bag');
+      toast(list.length > 1 ? t('savedLook') : t('savedPiece'));
     },
 
     remove(id) {
@@ -139,7 +162,7 @@
       if (!this.entries.length) {
         const p = document.createElement('p');
         p.className = 'bag-note';
-        p.textContent = 'Your styling bag is empty. Choose a size beside a piece to save it.';
+        p.textContent = t('emptyBag');
         wrap.append(p);
         total.textContent = '';
         exportBtn.disabled = true;
@@ -162,16 +185,17 @@
           const h3 = document.createElement('h3');
           h3.textContent = item.name;
           const p = document.createElement('p');
-          p.textContent = `Size ${option} · Quantity ${entry.quantity} · ${money.format(item.price)}`;
-          const link = document.createElement('a');
-          let host = '';
-          try { host = new URL(item.url).hostname; } catch (err) { host = ''; }
-          if (host !== 'nike-makknzjs.myshopify.com') throw new Error('The product link is unavailable.');
-          link.href = item.url;
-          link.target = '_blank';
-          link.rel = 'noopener noreferrer';
-          link.textContent = 'View original piece ↗';
-          details.append(h3, p, link);
+          p.textContent = t('bagRow', { o: option, q: entry.quantity, p: money.format(item.price) });
+          if (/^https?:/i.test(item.url || '')) {
+            const link = document.createElement('a');
+            link.href = item.url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.textContent = t('viewProduct');
+            details.append(h3, p, link);
+          } else {
+            details.append(h3, p);
+          }
 
           const remove = document.createElement('button');
           remove.type = 'button';
@@ -182,7 +206,7 @@
           row.append(img, details, remove);
           wrap.append(row);
         });
-        total.textContent = `Reference subtotal ${money.format(this.subtotal())}`;
+        total.textContent = t('subtotal', { t: money.format(this.subtotal()) });
         exportBtn.disabled = false;
       }
 
@@ -191,8 +215,8 @@
 
     export() {
       const parts = [
-        'RUNWAY — STYLING SHORTLIST',
-        'Reference prices; no order or payment has been placed.',
+        t('exportTitle'),
+        t('exportNote'),
         ''
       ];
       this.entries.forEach((entry) => {
@@ -989,7 +1013,7 @@
 
       if (!first && !this.reduced) this.sweep();
 
-      if (!first && this.live) this.live.textContent = `Look ${idx + 1}: ${LOOKS[idx].name}`;
+      if (!first && this.live) this.live.textContent = t('lookLabel', { i: idx + 1, n: LOOKS[idx].name });
 
       this.ticks.forEach((tick, j) => {
         tick.setAttribute('aria-current', j === idx ? 'true' : 'false');
@@ -1006,8 +1030,10 @@
         if (!first) panel.classList.add('is-in');
       }
 
+      const piecesText = ($('[data-rw-pieces-text]', panel) || {}).textContent
+        || t('pieces', { n: this.n });
       this.pieces.forEach((el) => {
-        el.textContent = '3 pieces';
+        el.textContent = piecesText;
         el.classList.remove('is-swap');
         void el.offsetWidth;
         el.classList.add('is-swap');
@@ -1475,6 +1501,8 @@
 
     /* --------------------------------------------------------------- feet */
     detectFeet() {
+      /* Canvas pixel probing needs a real origin; on file:// skip silently (no CORS noise). */
+      if (!/^https?:$/.test(location.protocol)) return;
       const urls = [...new Set(this.heroes.map((hero) => hero.dataset.probe).filter(Boolean))];
       urls.forEach((url) => {
         this.measureFoot(url).then((foot) => {

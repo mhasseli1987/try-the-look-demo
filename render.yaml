@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: try-the-look
+    runtime: static
+    buildCommand: node build.js
+    staticPublishPath: .
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: "public, max-age=86400"
